@@ -1,0 +1,15 @@
+form {
+  width: 60%;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+}
+form label, label input {
+  width: 100%;
+}
+form button {
+  width: 50%;
+  display: block;
+  text-transform: uppercase;
+  margin: 1rem auto;
+}
