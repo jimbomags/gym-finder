@@ -1,25 +1,69 @@
-import React, { useState, useEffect, Component } from 'react';
-import { Map, GoogleApiWrapper, Marker, InfoWindow } from 'google-maps-react';
+import React, { useState, useEffect } from 'react';
+import {
+  Map,
+  GoogleApiWrapper,
+  Marker,
+  InfoWindow,
+} from 'google-maps-react';
+import img from '../img/171453-32.png';
 
-const gym = {
-  company: "Gymbox",
-  location: "Farringdon",
-  streetName: "12A Leather Lane",
-  postCode: "EC1N 7SS",
+let gyms;
+
+const getGymData = async () => {
+  const data = await fetch('http://localhost:4001/');
+  const json = await data.json();
+
+  gyms = json;
 };
 
-const getCoordinates = async (postCode) => {
-  const data = await fetch(`https://api.postcodes.io/postcodes/${postCode}`);
-
+const getCoordinates = async (postcode) => {
+  const data = await fetch(`https://api.postcodes.io/postcodes/${postcode}`);
   return data.json();
 };
 
-const Results = ({ postCode, google }) => {
+const markersDataArray = [];
+
+const markersData = () => gyms.forEach(async (gym) => {
+  const { company, location, postcode } = gym;
+  let lat;
+  let lng;
+
+  await getCoordinates(postcode)
+    .then((data) => {
+      lat = data.result.latitude;
+      lng = data.result.longitude;
+    });
+  markersDataArray.push({
+    company,
+    location,
+    lat,
+    lng,
+  });
+});
+
+
+const Results = ({ postcode, google }) => {
   const [lat, updateLat] = useState();
   const [lng, updateLng] = useState();
   const [showInfoWindow, toggleInfoWindow] = useState(false);
   const [activeMarker, changeActiveMarker] = useState({});
   const [selectedPlace, changeSelectedPlace] = useState({});
+
+  useEffect(() => {
+    if (!gyms) {
+      getGymData();
+    }
+    if (markersDataArray.length === 0 && gyms) {
+      markersData();
+    }
+    if (postcode) {
+      getCoordinates(postcode)
+        .then((json) => {
+          updateLat(json.result.latitude);
+          updateLng(json.result.longitude);
+        });
+    }
+  });
 
   const mapStyles = {
     width: '50%',
@@ -30,20 +74,13 @@ const Results = ({ postCode, google }) => {
     changeSelectedPlace(props);
     toggleInfoWindow(true);
   };
-  const onMouseLeave = (props, marker, e) => {
-    console.log("Mouse Leave Event Fired")
-    changeActiveMarker(null);
-    toggleInfoWindow(false);
-  };
-
-  getCoordinates(postCode)
-    .then((json) => {
-      updateLat(json.result.latitude);
-      updateLng(json.result.longitude);
-    });
 
 
   if (lat && lng) {
+    const Markers = markersDataArray.map(marker => (
+      <Marker name={`${marker.company}, ${marker.location}`} position={{ lat: marker.lat, lng: marker.lng }} onClick={onMarkerClick} key={marker.lat} />
+    ));
+
     return (
       <Map
         google={google}
@@ -54,50 +91,21 @@ const Results = ({ postCode, google }) => {
           lng,
         }}
       >
-        <Marker
-          onMouseover={onMarkerClick}
-          onMouseout={onMouseLeave}
-          name="Gymbox, Farringdon"
-        />
+        <Marker position={{ lat, lng }} icon={{ url: img }} />
+        {Markers}
         <InfoWindow
           marker={activeMarker}
           visible={showInfoWindow}
         >
           <div>
-            <h1>{selectedPlace.name}</h1>
+            <h2>{selectedPlace.name}</h2>
           </div>
         </InfoWindow>
       </Map>
     );
-  } else {
-    return <h1>Loading...</h1>
   }
+  return null;
 };
-
-// const mapStyles = {
-//   width: '50%',
-//   height: '50%'
-// };
-
-// export class MapContainer extends Component {
-//   render() {
-//     return (
-//       <Map
-//         google={this.props.google}
-//         zoom={14}
-//         style={mapStyles}
-//         initialCenter={{
-//          lat: -1.2884,
-//          lng: 36.8233
-//         }} >
-//         <Marker />
-//         <InfoWindow visible={true} marker={{}}>
-//           <h1>Info Text</h1>
-//         </InfoWindow>  
-//       </Map>
-//     );
-//   }
-// }
 
 export default GoogleApiWrapper({
   apiKey: 'AIzaSyBXyBr0aRuW17PhrJ35hUS97EmKkyck9IY',

@@ -3,22 +3,16 @@ import './css/App.css';
 import SearchForm from './SearchForm';
 import Results from './components/Results';
 
-const gym = {
-  company: "Gymbox",
-  location: "Farringdon",
-  streetName: "12A Leather Lane",
-  postCode: "EC1N 7SS",
-};
-
 const App = () => {
+  const [postcode, changePostcode] = useState('');
+
   return (
     <div>
-      <SearchForm />
-      <Results postCode={gym.postCode} />
+      <SearchForm changePostcode={changePostcode} />
+      <Results postcode={postcode} />
     </div>
   );
 };
 
+
 export default App;
- 
- 
