@@ -9,12 +9,14 @@ import img from '../img/171453-32.png';
 
 let gyms;
 
-const getGymData = async () => {
+(async () => {
   const data = await fetch('https://ancient-ocean-16367.herokuapp.com/');
   const json = await data.json();
 
   gyms = json;
-};
+
+  markersData();
+})();
 
 const getCoordinates = async (postcode) => {
   const data = await fetch(`https://api.postcodes.io/postcodes/${postcode}`);
@@ -51,12 +53,12 @@ const Results = ({ postcode, google }) => {
   const [selectedPlace, changeSelectedPlace] = useState({});
 
   useEffect(() => {
-    if (!gyms) {
-      getGymData();
-    }
-    if (markersDataArray.length === 0 && gyms) {
-      markersData();
-    }
+    // if (!gyms) {
+    //   getGymData();
+    // }
+    // if (markersDataArray.length === 0 && gyms) {
+    //   markersData();
+    // }
     if (postcode) {
       getCoordinates(postcode)
         .then((json) => {
@@ -88,6 +90,10 @@ const Results = ({ postcode, google }) => {
         zoom={15}
         style={mapStyles}
         initialCenter={{
+          lat,
+          lng,
+        }}
+        center={{
           lat,
           lng,
         }}
