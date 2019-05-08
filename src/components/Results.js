@@ -10,7 +10,7 @@ import img from '../img/171453-32.png';
 let gyms;
 
 const getGymData = async () => {
-  const data = await fetch('http://localhost:4001/');
+  const data = await fetch('https://ancient-ocean-16367.herokuapp.com/');
   const json = await data.json();
 
   gyms = json;
@@ -66,8 +66,8 @@ const Results = ({ postcode, google }) => {
   });
 
   const mapStyles = {
-    width: '50%',
-    height: '50%',
+    width: '100%',
+    height: '70%',
   };
   const onMarkerClick = (props, marker, e) => {
     changeActiveMarker(marker);
@@ -84,7 +84,7 @@ const Results = ({ postcode, google }) => {
     return (
       <Map
         google={google}
-        zoom={14}
+        zoom={15}
         style={mapStyles}
         initialCenter={{
           lat,
@@ -98,7 +98,7 @@ const Results = ({ postcode, google }) => {
           visible={showInfoWindow}
         >
           <div>
-            <h2>{selectedPlace.name}</h2>
+            <h4>{selectedPlace.name}</h4>
           </div>
         </InfoWindow>
       </Map>
