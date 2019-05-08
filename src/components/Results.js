@@ -24,7 +24,7 @@ const getCoordinates = async (postcode) => {
 const markersDataArray = [];
 
 const markersData = () => gyms.forEach(async (gym) => {
-  const { company, location, postcode } = gym;
+  const { company, location, postcode, website } = gym;
   let lat;
   let lng;
 
@@ -38,6 +38,7 @@ const markersData = () => gyms.forEach(async (gym) => {
     location,
     lat,
     lng,
+    website,
   });
 });
 
@@ -78,7 +79,7 @@ const Results = ({ postcode, google }) => {
 
   if (lat && lng) {
     const Markers = markersDataArray.map(marker => (
-      <Marker name={`${marker.company}, ${marker.location}`} position={{ lat: marker.lat, lng: marker.lng }} onClick={onMarkerClick} key={marker.lat} />
+      <Marker name={`${marker.company}, ${marker.location}`} position={{ lat: marker.lat, lng: marker.lng }} onClick={onMarkerClick} key={marker.lat} website={marker.website} />
     ));
 
     return (
@@ -98,7 +99,7 @@ const Results = ({ postcode, google }) => {
           visible={showInfoWindow}
         >
           <div>
-            <h4>{selectedPlace.name}</h4>
+            <a href={selectedPlace.website} className="h5">{selectedPlace.name}</a>
           </div>
         </InfoWindow>
       </Map>
