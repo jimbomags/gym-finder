@@ -105,7 +105,7 @@ const Results = ({ postcode, google }) => {
           visible={showInfoWindow}
         >
           <div>
-            <a href={selectedPlace.website} className="h5">{selectedPlace.name}</a>
+            <a href={selectedPlace.website} target="_blank" rel="noopener noreferrer" className="h5">{selectedPlace.name}</a>
           </div>
         </InfoWindow>
       </Map>
