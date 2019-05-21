@@ -8,42 +8,7 @@ import {
 import img from '../img/171453-32.png';
 
 let gyms;
-
-(async () => {
-  const data = await fetch('https://ancient-ocean-16367.herokuapp.com/');
-  const json = await data.json();
-
-  gyms = json;
-
-  markersData();
-})();
-
-const getCoordinates = async (postcode) => {
-  const data = await fetch(`https://api.postcodes.io/postcodes/${postcode}`);
-  return data.json();
-};
-
 const markersDataArray = [];
-
-const markersData = () => gyms.forEach(async (gym) => {
-  const { company, location, postcode, website } = gym;
-  let lat;
-  let lng;
-
-  await getCoordinates(postcode)
-    .then((data) => {
-      lat = data.result.latitude;
-      lng = data.result.longitude;
-    });
-  markersDataArray.push({
-    company,
-    location,
-    lat,
-    lng,
-    website,
-  });
-});
-
 
 const Results = ({ postcode, google }) => {
   const [lat, updateLat] = useState();
@@ -51,20 +16,52 @@ const Results = ({ postcode, google }) => {
   const [showInfoWindow, toggleInfoWindow] = useState(false);
   const [activeMarker, changeActiveMarker] = useState({});
   const [selectedPlace, changeSelectedPlace] = useState({});
+  const [finishedFetching, changeFinishedFetching] = useState(false);
+
+  const getCoordinates = async (postcode) => {
+    const data = await fetch(`https://api.postcodes.io/postcodes/${postcode}`);
+    return data.json();
+  };
+
+  const markersData = () => gyms.forEach(async (gym, index) => {
+    const { company, location, postcode, website } = gym;
+    let lat;
+    let lng;
+
+    await getCoordinates(postcode)
+      .then((data) => {
+        lat = data.result.latitude;
+        lng = data.result.longitude;
+      });
+    markersDataArray.push({
+      company,
+      location,
+      lat,
+      lng,
+      website,
+    });
+    if (index === gyms.length - 1) {
+      changeFinishedFetching(true);
+    }
+  });
 
   useEffect(() => {
-    // if (!gyms) {
-    //   getGymData();
-    // }
-    // if (markersDataArray.length === 0 && gyms) {
-    //   markersData();
-    // }
     if (postcode) {
       getCoordinates(postcode)
         .then((json) => {
           updateLat(json.result.latitude);
           updateLng(json.result.longitude);
         });
+    }
+    if (!gyms) {
+      (async () => {
+        const data = await fetch('https://ancient-ocean-16367.herokuapp.com/');
+        const json = await data.json();
+
+        gyms = json;
+
+        markersData();
+      })();
     }
   });
 
@@ -80,6 +77,8 @@ const Results = ({ postcode, google }) => {
 
 
   if (lat && lng) {
+    console.log(finishedFetching);
+    
     const Markers = markersDataArray.map(marker => (
       <Marker name={`${marker.company}, ${marker.location}`} position={{ lat: marker.lat, lng: marker.lng }} onClick={onMarkerClick} key={marker.lat} website={marker.website} />
     ));
